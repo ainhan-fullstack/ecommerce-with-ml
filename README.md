@@ -70,13 +70,15 @@ Below is a **simplified schema** for the PostgreSQL database:
 ---
 
 ### Orders Table
-| Column       | Type             | Description                    |
-|--------------|------------------|--------------------------------|
-| id           | SERIAL PRIMARY KEY | Unique order ID              |
-| user_id      | INTEGER          | References Users(id)           |
-| total_amount | DECIMAL(10, 2)   | Total order amount             |
-| status       | VARCHAR(20)      | e.g. pending, shipped, delivered |
-| created_at   | TIMESTAMP        | Order date                     |
+| Column                | Type                      | Description                      |
+|-----------------------|---------------------------|----------------------------------|
+| id                    | SERIAL PRIMARY KEY        | Unique order ID                  |
+| user_id               | INTEGER                   | References Users(id)             |
+| total_amount          | DECIMAL(10, 2)            | Total order amount               |
+| status                | VARCHAR(20)               | e.g. pending, shipped, delivered |
+| stripe_payment_intent | VARCHAR(100)              | Stripe PaymentIntent ID          |
+| payment_status        | VARCHAR(20)               | e.g. succeeded, pending, failed  |
+| created_at            | TIMESTAMP                 | Order date                       |
 
 ---
 
@@ -107,6 +109,8 @@ Below is a **simplified schema** for the PostgreSQL database:
           |  React.js Frontend     |
           +------------------------+
                     |
+            Stripe.js Elements
+                    |
                     v
                +---------+
                |  Axios  |
@@ -116,6 +120,13 @@ Below is a **simplified schema** for the PostgreSQL database:
     +-----------------------------------+
     |  Node.js + Express REST API       |
     +-----------------------------------+
+                    |
+              Stripe Node SDK
+                    |
+                    v
+        +----------------------+
+        |  Stripe Payment API  |
+        +----------------------+
                     |
                     v
         +----------------------+
