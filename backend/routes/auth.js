@@ -2,6 +2,7 @@ const express = require("express");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const pool = require("../config/db");
+const { validateSignup, validateLogin } = require("../middleware/validation");
 require("dotenv").config({
   path: require("path").resolve(__dirname, "../../.env"),
 });
@@ -10,17 +11,25 @@ const route = express.Router();
 
 const jwt_secret = process.env.JWT_SECRET;
 
-route.post("/signup", async (req, res) => {
+route.post("/signup", validateSignup, async (req, res) => {
   const { username, email, password } = req.body;
 
   try {
-    const check = await pool.query(
+    const emailCheck = await pool.query(
       "Select * From ecommerce.users Where email = $1",
       [email]
     );
 
-    if (check.rows.length > 0)
+    if (emailCheck.rows.length > 0)
       return res.status(400).json({ message: "Email already registered." });
+
+    const userCheck = await pool.query(
+      "Select * From ecommerce.users where username = $1",
+      [username]
+    );
+
+    if (userCheck.rows.length > 0)
+      return res.status(400).json({ message: "Username already taken" });
 
     const saltRound = 10;
     const password_hash = await bcrypt.hash(password, saltRound);
@@ -43,7 +52,7 @@ route.post("/signup", async (req, res) => {
   }
 });
 
-route.post("/login", async (req, res) => {
+route.post("/login", validateLogin, async (req, res) => {
   const { email, password } = req.body;
 
   try {
