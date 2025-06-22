@@ -1,17 +1,19 @@
-const express = require('express');
-const cors = require('cors');
-const bodyParser = require('body-parser');
-require('dotenv').config({path: require('path').resolve(__dirname, '../.env')});
+const express = require("express");
+const cors = require("cors");
+const bodyParser = require("body-parser");
+const authRoutes = require("./routes/auth");
+require("dotenv").config({
+  path: require("path").resolve(__dirname, "../.env"),
+});
 
 const app = express();
-const paymentRoutes = require('./routes/payment');
+const paymentRoutes = require("./routes/payment");
 
 app.use(cors());
 app.use(bodyParser.json());
 
-
-app.get('/', (req, res) => res.send('Homepage!'));
-
-app.use('/api', paymentRoutes);
+app.get("/", (req, res) => res.send("Homepage!"));
+app.use("/api", paymentRoutes);
+app.use("/api", authRoutes);
 
 module.exports = app;
