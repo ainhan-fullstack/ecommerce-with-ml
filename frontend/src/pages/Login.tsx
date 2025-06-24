@@ -2,8 +2,9 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import type { LoginInputs } from "../types/auth";
-import axios from "axios";
+import api from "../utils/axios";
 import { useNavigate } from "react-router-dom";
+import { setAccessToken } from "../utils/auth";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address."),
@@ -22,9 +23,12 @@ const Login = () => {
 
   const onSubmit = async (data: LoginInputs) => {
     try {
-      const url = "http://localhost:5000/api/login";
-      const res = await axios.post(url, data);
+      //const url = "http://localhost:5000/api/login";
+      const res = await api.post("/login", data, {
+        withCredentials: true,
+      });
       localStorage.setItem("token", res.data.token);
+      setAccessToken(res.data.token);
       navigate("/");
     } catch (err: any) {
       alert(err.response?.data?.message);

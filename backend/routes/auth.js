@@ -3,6 +3,11 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const pool = require("../config/db");
 const { validateSignup, validateLogin } = require("../middleware/validation");
+const {
+  generateAccessToken,
+  generateRefreshToken,
+  verifyRefreshToken,
+} = require("../utils/token");
 require("dotenv").config({
   path: require("path").resolve(__dirname, "../../.env"),
 });
@@ -41,11 +46,21 @@ route.post("/signup", validateSignup, async (req, res) => {
 
     const user = result.rows[0];
 
-    const token = jwt.sign({ id: user.id, email: user.email }, jwt_secret, {
-      expiresIn: "7d",
-    });
+    // const token = jwt.sign({ id: user.id, email: user.email }, jwt_secret, {
+    //   expiresIn: "7d",
+    // });
+    const accessToken = generateAccessToken(user);
+    const refreshToken = generateRefreshToken(user);
 
-    res.status(201).json({ token, user });
+    res
+      .cookie("refreshToken", refreshToken, {
+        httpOnly: true,
+        secure: false,
+        sameSite: "strict",
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      })
+      .status(201)
+      .json({ token: accessToken, user });
   } catch (error) {
     console.error("Signup Error", error);
     res.status(500).json({ message: "Server Error." });
@@ -68,21 +83,50 @@ route.post("/login", validateLogin, async (req, res) => {
     const match = await bcrypt.compare(password, user.password_hash);
     if (!match) return res.status(400).json({ message: "Invalid credential" });
 
-    const token = jwt.sign({ id: user.id, email: user.email }, jwt_secret, {
-      expiresIn: "7d",
-    });
+    // const token = jwt.sign({ id: user.id, email: user.email }, jwt_secret, {
+    //   expiresIn: "7d",
+    // });
+    const accessToken = generateAccessToken(user);
+    const refreshToken = generateRefreshToken(user);
 
-    res.status(200).json({
-      token,
-      user: {
-        id: user.id,
-        username: user.username,
-        email: user.email,
-      },
-    });
+    res
+      .cookie("refreshToken", refreshToken, {
+        httpOnly: true,
+        secure: false,
+        sameSite: "strict",
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      })
+      .status(200)
+      .json({
+        token: accessToken,
+        user: {
+          id: user.id,
+          username: user.username,
+          email: user.email,
+        },
+      });
   } catch (error) {
     console.error("Login Error", error);
     res.status(500).json({ message: "Server Error" });
+  }
+});
+
+route.post("/logout", (req, res) => {
+  res.clearCookie("refreshToken");
+  res.json({ message: "Logged out successfully." });
+});
+
+route.post("/refresh-token", (res, req) => {
+  const token = req.cookie.refreshToken;
+
+  if (!token) return res.status(401).json({ message: "Refresh token missing" });
+
+  try {
+    const payload = verifyRefreshToken(token);
+    const newAccessToken = generateAccessToken(payload);
+    res.json({ token: newAccessToken });
+  } catch (err) {
+    res.status(403).json({ message: "Invalid refresh token" });
   }
 });
 

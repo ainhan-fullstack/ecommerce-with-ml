@@ -2,7 +2,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import type { SignupInputs } from "../types/auth";
-import axios from "axios";
+import api from "../utils/axios";
 
 const signupSchema = z.object({
   username: z.string().min(8),
@@ -21,8 +21,8 @@ const Signup = () => {
 
   const onSubmit = async (data: SignupInputs) => {
     try {
-      const url = `http://localhost:5000/api/signup`;
-      const res = await axios.post(url, data);
+      //const url = `http://localhost:5000/api/signup`;
+      const res = await api.post("/singup", data);
       localStorage.setItem("token", res.data.token);
     } catch (err: any) {
       alert(err.response?.data?.message);
