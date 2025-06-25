@@ -8,18 +8,6 @@ interface TokenPayLoad {
   exp: number;
 }
 
-let accessToken: string | null = null;
-
-const tokenFromStorage = localStorage.getItem("token");
-if (tokenFromStorage) accessToken = tokenFromStorage;
-
-export const setAccessToken = (token: string) => {
-  accessToken = token;
-  localStorage.setItem("token", token);
-};
-
-export const getAccessToken = () => accessToken;
-
 export const isTokenValid = (): boolean => {
   const token = localStorage.getItem("token");
 
@@ -34,6 +22,18 @@ export const isTokenValid = (): boolean => {
     return false;
   }
 };
+
+let accessToken: string | null = null;
+
+const tokenFromStorage = localStorage.getItem("token");
+if (tokenFromStorage) accessToken = tokenFromStorage;
+
+export const setAccessToken = (token: string) => {
+  accessToken = token;
+  localStorage.setItem("token", token);
+};
+
+export const getAccessToken = () => accessToken;
 
 export const fetchWithAuth = async (
   url: string,

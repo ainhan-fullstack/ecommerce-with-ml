@@ -1,6 +1,5 @@
 const express = require("express");
 const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
 const pool = require("../config/db");
 const { validateSignup, validateLogin } = require("../middleware/validation");
 const {
@@ -117,13 +116,14 @@ route.post("/logout", (req, res) => {
 });
 
 route.post("/refresh-token", (res, req) => {
-  const token = req.cookie.refreshToken;
+  const token = req.cookies.refreshToken;
 
   if (!token) return res.status(401).json({ message: "Refresh token missing" });
 
   try {
     const payload = verifyRefreshToken(token);
-    const newAccessToken = generateAccessToken(payload);
+    const user = { id: payload.id, email: payload.email };
+    const newAccessToken = generateAccessToken(user);
     res.json({ token: newAccessToken });
   } catch (err) {
     res.status(403).json({ message: "Invalid refresh token" });
