@@ -1,6 +1,14 @@
 export interface Product {
   id: number;
   name: string;
+  price: number;
+  image_url: string;
+  rating: number;
+}
+
+export interface ProductDetails {
+  id: number;
+  name: string;
   description: string;
   price: number;
   image_url: string;
@@ -10,3 +18,5 @@ export interface Product {
   rating: number;
   images: string[];
 }
+
+export type Category = "Clothing" | "Home" | "Beauty" | "Food" | "Pets";

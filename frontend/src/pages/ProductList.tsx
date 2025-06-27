@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 import type { Product } from "../types/products";
 import api from "../utils/axios";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Star } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const ProductList = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -13,49 +17,37 @@ const ProductList = () => {
   }, []);
 
   return (
-    <div className="p-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 mt-5">
       {products.map((product) => (
-        <div
-          key={product.id}
-          className="border rounded-lg p-4 shadow-lg bg-white hover:shadow-2xl transition-shadow duration-300 flex flex-col"
-        >
-          <div className="flex justify-center mb-3">
+        <Card key={product.id} className="hover:shadow-xl transition-shadow">
+          <CardHeader className="flex flex-col items-center">
             <img
               src={product.image_url}
               alt={product.name}
-              className="w-48 h-48 object-cover rounded-lg border-2 border-gray-200 shadow-md hover:scale-105 transition-transform duration-200"
+              className="w-40 h-40 object-cover rounded-lg mb-2 border"
             />
-          </div>
-          {product.images && product.images.length > 0 && (
-            <div className="flex gap-2 overflow-x-auto mb-3 scrollbar-thin scrollbar-thumb-gray-400">
-              {product.images.map((img, i) => (
-                <img
-                  key={i}
-                  src={img}
-                  alt={`${product.name} detail ${i + 1}`}
-                  className="w-16 h-16 object-cover rounded border flex-shrink-0 hover:ring-2 hover:ring-blue-400 transition"
-                />
-              ))}
+            <CardTitle className="text-lg font-semibold text-center">
+              <Link to={`/products/${product.id}`} className="cursor-pointer">
+                {product.name}
+              </Link>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col flex-grow">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-green-600 font-bold text-xl">
+                ${Number(product.price).toFixed(2)}
+              </span>
+              <Badge variant="secondary" className="flex items-center gap-1">
+                <Star className="w-4 h-4 text-yellow-400" />
+                {product.rating}
+              </Badge>
             </div>
-          )}
-          <h3 className="text-xl font-semibold text-gray-800 mb-1">
-            {product.name}
-          </h3>
-          <p className="text-sm text-gray-600 mb-2 line-clamp-2">
-            {product.description}
-          </p>
-          <div className="flex justify-between items-center mt-auto">
-            <span className="font-bold text-lg text-green-600">
-              ${Number(product.price).toFixed(2)}
-            </span>
-            <span className="text-xs text-yellow-500 flex items-center gap-1">
-              ★ {product.rating}
-            </span>
-            <span className="text-xs text-gray-500 px-2 py-1 bg-gray-100 rounded">
-              {product.category}
-            </span>
-          </div>
-        </div>
+            <div className="flex-grow" />
+            <button className="w-full mt-4 bg-primary text-white py-2 rounded hover:bg-primary/90 transition cursor-pointer">
+              Add to cart
+            </button>
+          </CardContent>
+        </Card>
       ))}
     </div>
   );
