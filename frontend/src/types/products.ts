@@ -13,7 +13,7 @@ export interface ProductDetails {
   price: number;
   image_url: string;
   category: string;
-  stock_quatity: number;
+  stock_quantity: number;
   created_at: string;
   rating: number;
   images: string[];
