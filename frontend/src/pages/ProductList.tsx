@@ -5,6 +5,7 @@ import ProductCard from "@/components/ProductCard";
 import SkeletonCard from "@/components/SkeletonCard";
 import { useSearchParams } from "react-router-dom";
 import PaginationBar from "@/components/PaginationBar";
+import Filters from "@/components/Filters";
 
 const PAGE_SIZE = 12;
 
@@ -37,6 +38,7 @@ const ProductList = () => {
 
   return (
     <div className="p-6">
+      <Filters />
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-8">
         {isPending
           ? Array.from({ length: 8 }).map((_, i) => (
