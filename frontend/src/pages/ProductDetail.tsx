@@ -2,13 +2,12 @@ import { Button } from "@/components/ui/button";
 import type { ProductDetails } from "@/types/products";
 import api from "@/utils/axios";
 import { Heart, ShoppingCart, Star } from "lucide-react";
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
   const [product, setProduct] = useState<ProductDetails | null>(null);
-  const [isPending, startTransition] = useTransition();
 
   useEffect(() => {
     api
@@ -43,7 +42,6 @@ const ProductDetail = () => {
       <div className="space-y-4">
         <h1 className="text-2xl font-bold">{product.name}</h1>
         <div className="flex items-center gap-2 text-sm text-gray-500">
-          {/* <span>{product.category}</span> */}
           <span className="text-yellow-500 flex items-center">
             <Star className="w-4 h-4 fill-yellow-500 mr-1" /> {product.rating}
           </span>

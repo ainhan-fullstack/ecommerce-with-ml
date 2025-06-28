@@ -3,21 +3,37 @@ import type { Product } from "../types/products";
 import api from "../utils/axios";
 import ProductCard from "@/components/ProductCard";
 import SkeletonCard from "@/components/SkeletonCard";
+import { useSearchParams } from "react-router-dom";
+import PaginationBar from "@/components/PaginationBar";
+
+const PAGE_SIZE = 12;
 
 const ProductList = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [isPending, startTransition] = useTransition();
+  const [totalCount, setTotalCount] = useState(0);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const totalPages = Math.ceil(totalCount / PAGE_SIZE);
+  const pageParam = parseInt(searchParams.get("page") || "1", 10);
+  const page = isNaN(pageParam) || pageParam < 1 ? 1 : pageParam;
 
   useEffect(() => {
-    api
-      .get<Product[]>("/products")
-      .then((res) => {
-        startTransition(() => {
+    startTransition(() => {
+      api
+        .get<Product[]>(`/products?page=${page}&limit=${PAGE_SIZE}`)
+        .then((res) => {
           setProducts(res.data);
-        });
-      })
-      .catch(() => alert("Failed to load products."));
-  }, []);
+          const count = parseInt(res.headers["x-total-count"] || "0", 10);
+          setTotalCount(count);
+        })
+        .catch(() => alert("Failed to load Product"));
+    });
+  }, [page]);
+
+  const handlePageChange = (newPage: number) => {
+    setSearchParams({ page: newPage.toString() });
+  };
 
   return (
     <div className="p-6">
@@ -33,6 +49,12 @@ const ProductList = () => {
               />
             ))}
       </div>
+
+      <PaginationBar
+        page={page}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
+      />
     </div>
   );
 };

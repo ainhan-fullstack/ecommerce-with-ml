@@ -14,7 +14,7 @@ export const isTokenValid = (): boolean => {
   if (!token) return false;
 
   try {
-    const decode = jwtDecode<TokenPayLoad>(token!);
+    const decode = jwtDecode<TokenPayLoad>(token);
     const currentTime = Math.floor(Date.now() / 1000);
 
     return decode.exp > currentTime;
