@@ -7,6 +7,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+// interface FiltersProps {
+//   keyword: string;
+//   onChange: () => void;
+// }
+
 const Filters = () => {
   return (
     <div className="mb-5 flex gap-4">

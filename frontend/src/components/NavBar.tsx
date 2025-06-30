@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import logo from "../assets/ecommerce-random-logo.webp";
 import { Menu, ShoppingCart, User, X } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -7,6 +7,9 @@ import CategoryBar from "./CategoryBar";
 const NavBar = () => {
   const [showBurger, setShowBurger] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -19,6 +22,16 @@ const NavBar = () => {
   useEffect(() => {
     if (!showBurger && menuOpen) setMenuOpen(false);
   }, [showBurger, menuOpen]);
+
+  useEffect(() => {
+    setSearch(searchParams.get("q") || "");
+  }, [searchParams]);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    navigate(`/products?q=${encodeURIComponent(search)}`);
+    setSearch("");
+  };
 
   const handleMenuToggle = () => {
     setMenuOpen((prev) => !prev);
@@ -42,11 +55,15 @@ const NavBar = () => {
         </div>
         <div className="flex flex-1 justify-center">
           <div className="w-1/2">
-            <input
-              type="text"
-              placeholder="Search product..."
-              className="w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
-            />
+            <form onSubmit={handleSearch}>
+              <input
+                type="text"
+                placeholder="Search product..."
+                value={search}
+                className="w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </form>
           </div>
         </div>
         <div className="flex items-center gap-6">
@@ -65,7 +82,6 @@ const NavBar = () => {
             <span>Cart</span>
           </Link>
         </div>
-        {/* {menuOpen && <CategoryBar />} */}
       </nav>
       {menuOpen && (
         <div className="fixed top-0 left-0 w-full z-40">

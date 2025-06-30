@@ -19,10 +19,18 @@ const ProductList = () => {
   const pageParam = parseInt(searchParams.get("page") || "1", 10);
   const page = isNaN(pageParam) || pageParam < 1 ? 1 : pageParam;
 
+  const searchQuery = searchParams.get("q") || "";
+
   useEffect(() => {
     startTransition(() => {
       api
-        .get<Product[]>(`/products?page=${page}&limit=${PAGE_SIZE}`)
+        .get<Product[]>("/products", {
+          params: {
+            page,
+            limit: PAGE_SIZE,
+            searchQuery,
+          },
+        })
         .then((res) => {
           setProducts(res.data);
           const count = parseInt(res.headers["x-total-count"] || "0", 10);
@@ -30,10 +38,14 @@ const ProductList = () => {
         })
         .catch(() => alert("Failed to load Product"));
     });
-  }, [page]);
+  }, [page, searchQuery]);
 
   const handlePageChange = (newPage: number) => {
-    setSearchParams({ page: newPage.toString() });
+    setSearchParams((prev) => {
+      const params = new URLSearchParams(prev);
+      params.set("page", newPage.toString());
+      return params;
+    });
   };
 
   return (

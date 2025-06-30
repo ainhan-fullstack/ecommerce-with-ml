@@ -6,25 +6,45 @@ route.get("/products", async (req, res) => {
   try {
     const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.limit, 10) || 12;
+    const searchQuery = req.query.searchQuery || "";
     const offset = (page - 1) * limit;
 
+    let baseQuery = `
+      Select p.*
+      From ecommerce.products p
+    `;
+
+    let whereClause = "";
+    let params = [limit, offset];
+
+    if (searchQuery) {
+      whereClause = "WHERE p.name ILIKE $3";
+      params.push(`%${searchQuery}%`);
+    }
+
     const countResult = await pool.query(
-      "Select COUNT(1) FROM ecommerce.products"
+      `Select Count(1) From ecommerce.products ${
+        searchQuery ? "WHERE name ILIKE $1" : ""
+      }`,
+      searchQuery ? [`%${searchQuery}%`] : []
     );
+
     const totalCount = parseInt(countResult.rows[0].count, 10);
-    const result = await pool.query(
+
+    const results = await pool.query(
       `
-        Select p.*
-        From ecommerce.products p
-        Group By p.id
-        Order by p.id ASC
+        ${baseQuery}
+        ${whereClause}
+        GROUP BY p.id
+        ORDER BY p.id ASC
         LIMIT $1 OFFSET $2
-        `,
-      [limit, offset]
+      `,
+      params
     );
+
     res.set("x-total-count", totalCount);
     res.set("Access-Control-Expose-Headers", "x-total-count");
-    res.json(result.rows);
+    res.json(results.rows);
   } catch (err) {
     res.status(500).json({ message: "Error fetching products" + err });
   }
