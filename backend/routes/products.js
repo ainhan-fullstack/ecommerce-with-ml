@@ -8,17 +8,20 @@ route.get("/products", async (req, res) => {
     const limit = parseInt(req.query.limit, 10) || 12;
     const searchQuery = req.query.searchQuery || "";
     const offset = (page - 1) * limit;
+    const orderBy = req.query.orderBy || "id";
+    const orderDir = req.query.orderDir || "asc";
 
     let baseQuery = `
       Select p.*
       From ecommerce.products p
+      Where 1 = 1
     `;
 
     let whereClause = "";
     let params = [limit, offset];
 
     if (searchQuery) {
-      whereClause = "WHERE p.name ILIKE $3";
+      whereClause = "AND p.name ILIKE $3";
       params.push(`%${searchQuery}%`);
     }
 
@@ -36,7 +39,7 @@ route.get("/products", async (req, res) => {
         ${baseQuery}
         ${whereClause}
         GROUP BY p.id
-        ORDER BY p.id ASC
+        ORDER BY p.${orderBy} ${orderDir}
         LIMIT $1 OFFSET $2
       `,
       params
@@ -47,6 +50,25 @@ route.get("/products", async (req, res) => {
     res.json(results.rows);
   } catch (err) {
     res.status(500).json({ message: "Error fetching products" + err });
+  }
+});
+
+route.get("/products/:category", async (req, res) => {
+  const category = req.params.category;
+
+  try {
+    const results = await pool.query(
+      `
+    Select p.*
+    From ecommerce.products p
+    where category = $1
+    `,
+      [category]
+    );
+
+    res.json(results.rows);
+  } catch (err) {
+    res.status(500).json({ message: "Error fetching category." });
   }
 });
 

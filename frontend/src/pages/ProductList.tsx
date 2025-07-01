@@ -20,6 +20,8 @@ const ProductList = () => {
   const page = isNaN(pageParam) || pageParam < 1 ? 1 : pageParam;
 
   const searchQuery = searchParams.get("q") || "";
+  const orderBy = searchParams.get("orderBy") || "";
+  const orderDir = searchParams.get("order") || "";
 
   useEffect(() => {
     startTransition(() => {
@@ -29,6 +31,8 @@ const ProductList = () => {
             page,
             limit: PAGE_SIZE,
             searchQuery,
+            orderBy,
+            orderDir,
           },
         })
         .then((res) => {
@@ -38,7 +42,7 @@ const ProductList = () => {
         })
         .catch(() => alert("Failed to load Product"));
     });
-  }, [page, searchQuery]);
+  }, [page, searchQuery, orderBy, orderDir]);
 
   const handlePageChange = (newPage: number) => {
     setSearchParams((prev) => {

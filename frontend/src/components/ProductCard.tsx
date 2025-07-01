@@ -5,11 +5,11 @@ import { Link } from "react-router-dom";
 
 const ProductCard = ({ product }: { product: Product }) => {
   return (
-    <Card className="w-full shadow-md hover:shadow-lg transition duration-200">
+    <Card className="w-full flex items-center shadow-md hover:shadow-lg transition duration-200">
       <img
         src={product.image_url}
         alt={product.name}
-        className="w-full h-48 object-cover rounded-t-2xl"
+        className="w-60 h-60 object-cover rounded-t-2xl"
       />
       <CardContent className="space-y-2 p-4">
         <h3 className="text-sm font-medium leading-tight line-clamp-2">
