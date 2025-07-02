@@ -1,4 +1,4 @@
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import logo from "../assets/ecommerce-random-logo.webp";
 import { Menu, ShoppingCart, User, X } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -9,7 +9,6 @@ const NavBar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [search, setSearch] = useState("");
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -22,10 +21,6 @@ const NavBar = () => {
   useEffect(() => {
     if (!showBurger && menuOpen) setMenuOpen(false);
   }, [showBurger, menuOpen]);
-
-  useEffect(() => {
-    setSearch(searchParams.get("q") || "");
-  }, [searchParams]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,9 +54,9 @@ const NavBar = () => {
               <input
                 type="text"
                 placeholder="Search product..."
-                value={search}
                 className="w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
                 onChange={(e) => setSearch(e.target.value)}
+                value={search}
               />
             </form>
           </div>

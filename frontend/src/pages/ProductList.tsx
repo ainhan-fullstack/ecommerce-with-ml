@@ -22,6 +22,7 @@ const ProductList = () => {
   const searchQuery = searchParams.get("q") || "";
   const orderBy = searchParams.get("orderBy") || "";
   const orderDir = searchParams.get("order") || "";
+  const category = searchParams.get("category") || "";
 
   useEffect(() => {
     startTransition(() => {
@@ -33,6 +34,7 @@ const ProductList = () => {
             searchQuery,
             orderBy,
             orderDir,
+            category,
           },
         })
         .then((res) => {
@@ -40,9 +42,9 @@ const ProductList = () => {
           const count = parseInt(res.headers["x-total-count"] || "0", 10);
           setTotalCount(count);
         })
-        .catch(() => alert("Failed to load Product"));
+        .catch(() => alert("Failed to load products"));
     });
-  }, [page, searchQuery, orderBy, orderDir]);
+  }, [page, searchQuery, orderBy, orderDir, category]);
 
   const handlePageChange = (newPage: number) => {
     setSearchParams((prev) => {

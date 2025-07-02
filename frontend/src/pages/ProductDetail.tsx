@@ -11,7 +11,7 @@ const ProductDetail = () => {
 
   useEffect(() => {
     api
-      .get(`/product/${id}`)
+      .get(`/products/${id}`)
       .then((res) => setProduct(res.data[0]))
       .catch((err: any) => alert(err.response?.data[0]?.message));
   }, [id]);

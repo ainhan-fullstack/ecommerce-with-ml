@@ -13,7 +13,7 @@ const ProductCard = ({ product }: { product: Product }) => {
       />
       <CardContent className="space-y-2 p-4">
         <h3 className="text-sm font-medium leading-tight line-clamp-2">
-          <Link to={`/product/${product.id}`} className="cursor-pointer">
+          <Link to={`/products/${product.id}`} className="cursor-pointer">
             {product.name}
           </Link>
         </h3>
