@@ -62,20 +62,24 @@ const NavBar = () => {
           </div>
         </div>
         <div className="flex items-center gap-6">
-          <Link
-            to={"/profile"}
+          <button
             className="flex items-center gap-1 hover:text-primary"
+            onClick={() => {
+              window.location.href = "/profile";
+            }}
           >
             <User className="w-5 h-5" />
             <span>User Profile</span>
-          </Link>
-          <Link
-            to={"/cart"}
+          </button>
+          <button
             className="flex items-center gap-1 hover:text-primary"
+            onClick={() => {
+              window.location.href = "/cart";
+            }}
           >
             <ShoppingCart className="w-5 h-5" />
             <span>Cart</span>
-          </Link>
+          </button>
         </div>
       </nav>
       {menuOpen && (

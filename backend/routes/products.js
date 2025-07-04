@@ -10,7 +10,6 @@ route.get("/products", async (req, res) => {
     const offset = (page - 1) * limit;
     const orderBy = req.query.orderBy || "id";
     const orderDir = req.query.orderDir || "asc";
-    const category = req.query.category || "";
 
     let baseQuery = `
       Select p.*
@@ -24,11 +23,6 @@ route.get("/products", async (req, res) => {
     if (searchQuery) {
       whereParts.push(`p.name ILIKE $${paramsIdx++}`);
       params.push(`%${searchQuery}%`);
-    }
-
-    if (category) {
-      whereParts.push(`lower(p.category) = lower($${paramsIdx++})`);
-      params.push(category);
     }
 
     const whereClause =
@@ -50,17 +44,6 @@ route.get("/products", async (req, res) => {
         GROUP BY p.id
         ORDER BY p.${orderBy} ${orderDir}
         LIMIT $${params.length - 1} OFFSET $${params.length}
-      `,
-      params
-    );
-
-    console.log(
-      `
-        ${baseQuery}
-        ${whereClause}
-        GROUP BY p.id
-        ORDER BY p.${orderBy} ${orderDir}
-        LIMIT $1 OFFSET $2
       `,
       params
     );
@@ -90,27 +73,58 @@ route.get("/products/:id", async (req, res) => {
 
     res.json(result.rows);
   } catch (err) {
-    res.status(500).json({ message: "Error fetching product" });
+    res.status(500).json({ message: "Error fetching product details" });
   }
 });
 
-// route.get("/products/:category", async (req, res) => {
-//   const category = req.params.category;
+route.get("/category/:category", async (req, res) => {
+  const category = req.params.category;
+  const page = parseInt(req.query.page, 10) || 1;
+  const limit = parseInt(req.query.limit, 10) || 12;
+  const searchQuery = req.query.searchQuery || "";
+  const offset = (page - 1) * limit;
+  const orderBy = req.query.orderBy || "id";
+  const orderDir = req.query.orderDir || "asc";
 
-//   try {
-//     const results = await pool.query(
-//       `
-//     Select p.*
-//     From ecommerce.products p
-//     where lower(p.category) = lower($1)
-//     `,
-//       [category]
-//     );
+  let params = [];
+  let whereClause = "";
+  let paramIdx = 1;
+  let whereParts = [];
+  whereParts.push(` lower(p.category) = lower($${paramIdx++})`);
+  params.push(category);
+  if (searchQuery) {
+    whereParts.push(`p.name ILIKE ${paramIdx++}`);
+    params.push(`%${searchQuery}%`);
+  }
+  whereClause = "WHERE" + whereParts.join(" AND ");
+  params.push(limit, offset);
 
-//     res.json(results.rows);
-//   } catch (err) {
-//     res.status(500).json({ message: "Error fetching category." });
-//   }
-// });
+  try {
+    const results = await pool.query(
+      `
+    Select p.*
+    From ecommerce.products p
+    ${whereClause}
+    ORDER BY ${orderBy} ${orderDir}
+    LIMIT $${params.length - 1} OFFSET $${params.length}
+    `,
+      params
+    );
+
+    const resultCount = await pool.query(
+      `
+      Select COUNT(1) FROM ecommerce.products p where lower(p.category) = lower($1)
+      `,
+      [category]
+    );
+
+    const totalCount = parseInt(resultCount.rows[0].count, 10);
+    res.set("x-total-count", totalCount);
+    res.set("Access-Control-Expose-Headers", "x-total-count");
+    res.json(results.rows);
+  } catch (err) {
+    res.status(500).json({ message: "Error fetching category." });
+  }
+});
 
 module.exports = route;

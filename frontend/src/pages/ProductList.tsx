@@ -3,7 +3,7 @@ import type { Product } from "../types/products";
 import api from "../utils/axios";
 import ProductCard from "@/components/ProductCard";
 import SkeletonCard from "@/components/SkeletonCard";
-import { useSearchParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import PaginationBar from "@/components/PaginationBar";
 import Filters from "@/components/Filters";
 
@@ -22,7 +22,7 @@ const ProductList = () => {
   const searchQuery = searchParams.get("q") || "";
   const orderBy = searchParams.get("orderBy") || "";
   const orderDir = searchParams.get("order") || "";
-  const category = searchParams.get("category") || "";
+  const { category } = useParams<{ category: string }>();
 
   useEffect(() => {
     startTransition(() => {
@@ -34,7 +34,6 @@ const ProductList = () => {
             searchQuery,
             orderBy,
             orderDir,
-            category,
           },
         })
         .then((res) => {
@@ -44,7 +43,24 @@ const ProductList = () => {
         })
         .catch(() => alert("Failed to load products"));
     });
-  }, [page, searchQuery, orderBy, orderDir, category]);
+  }, [page, searchQuery, orderBy, orderDir]);
+
+  useEffect(() => {
+    if (!category) return;
+    api
+      .get(`/category/${category}`, {
+        params: {
+          page,
+          limit: PAGE_SIZE,
+        },
+      })
+      .then((res) => {
+        setProducts(res.data);
+        const count = parseInt(res.headers["x-total-count"] || "0", 10);
+        setTotalCount(count);
+      })
+      .catch(() => alert("Could not load products."));
+  }, [category, page]);
 
   const handlePageChange = (newPage: number) => {
     setSearchParams((prev) => {
