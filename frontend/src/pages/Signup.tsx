@@ -21,7 +21,6 @@ const Signup = () => {
 
   const onSubmit = async (data: SignupInputs) => {
     try {
-      //const url = `http://localhost:5000/api/signup`;
       const res = await api.post("/singup", data);
       localStorage.setItem("token", res.data.token);
     } catch (err: any) {

@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { useCart } from "@/hook/useCart";
 import type { ProductDetails } from "@/types/products";
 import api from "@/utils/axios";
 import { Heart, ShoppingCart, Star } from "lucide-react";
@@ -10,6 +11,7 @@ const ProductDetail = () => {
   const [product, setProduct] = useState<ProductDetails | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const { addToCart } = useCart();
 
   const handleQuantityIncrease = () => {
     setQuantity((prev) =>
@@ -166,7 +168,6 @@ const ProductDetail = () => {
                   if (val >= 1 && val <= product.stock_quantity)
                     setQuantity(val);
                 }}
-                // disabled={true}
                 required
               />
               <button
@@ -197,7 +198,10 @@ const ProductDetail = () => {
           </form>
         </div>
         <div className="flex gap-4 mt-10">
-          <Button className="flex gap-2 items-center cursor-pointer hover:bg-red-600">
+          <Button
+            className="flex gap-2 items-center cursor-pointer hover:bg-red-600"
+            onClick={() => addToCart(product.id, quantity)}
+          >
             <ShoppingCart className="w-4 h-4" /> Add to cart
           </Button>
           <Button

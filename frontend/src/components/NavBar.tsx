@@ -3,12 +3,14 @@ import logo from "../assets/ecommerce-random-logo.webp";
 import { Menu, ShoppingCart, User, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import CategoryBar from "./CategoryBar";
+import { useCart } from "@/hook/useCart";
 
 const NavBar = () => {
   const [showBurger, setShowBurger] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [search, setSearch] = useState("");
   const navigate = useNavigate();
+  const { cartCount } = useCart();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -72,13 +74,15 @@ const NavBar = () => {
             <span>User Profile</span>
           </button>
           <button
-            className="flex items-center gap-1 hover:text-primary"
+            className="relative flex items-center gap-1 hover:text-primary"
             onClick={() => {
               window.location.href = "/cart";
             }}
           >
+            <span className="absolute -top-2 -right-4 bg-red-500 text-white rounded-full text-xs px-1">
+              {cartCount}
+            </span>
             <ShoppingCart className="w-5 h-5" />
-            <span>Cart</span>
           </button>
         </div>
       </nav>
