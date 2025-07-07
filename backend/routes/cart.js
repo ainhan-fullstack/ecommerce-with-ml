@@ -1,5 +1,5 @@
 const express = require("express");
-const route = express.Router();
+const router = express.Router();
 const pool = require("../config/db");
 const verifyToken = require("../middleware/auth");
 
@@ -65,7 +65,7 @@ const buildCart = async (userId) => {
   };
 };
 
-route.get("/cart", verifyToken, async (req, res) => {
+router.get("/cart", verifyToken, async (req, res) => {
   try {
     const userId = req.user.id;
     const cart = await buildCart(userId);
@@ -75,7 +75,7 @@ route.get("/cart", verifyToken, async (req, res) => {
   }
 });
 
-route.post("/cart", verifyToken, async (req, res) => {
+router.post("/cart", verifyToken, async (req, res) => {
   const userId = req.user.id;
   const { product_id, quantity } = req.body;
 
@@ -136,4 +136,4 @@ route.post("/cart", verifyToken, async (req, res) => {
   }
 });
 
-module.exports = route;
+module.exports = router;

@@ -1,32 +1,35 @@
 const express = require("express");
-const route = express.Router();
+const router = express.Router();
 const pool = require("../config/db");
 
-route.get("/products", async (req, res) => {
+function getPagination(req) {
+  const page = parseInt(req.query.page, 10) || 1;
+  const limit = parseInt(req.query.limit, 10) || 12;
+  const offset = (page - 1) * limit;
+  const orderBy = req.query.orderBy || "id";
+  const orderDir = req.query.orderDir || "asc";
+  return { limit, offset, orderBy, orderDir };
+}
+
+function sendPaginated(res, rows, totalCount) {
+  res.set("x-total-count", totalCount);
+  res.set("Access-Control-Expose-Headers", "x-total-count");
+  res.json(rows);
+}
+
+router.get("/products", async (req, res) => {
   try {
-    const page = parseInt(req.query.page, 10) || 1;
-    const limit = parseInt(req.query.limit, 10) || 12;
+    const { limit, offset, orderBy, orderDir } = getPagination(req);
+
     const searchQuery = req.query.searchQuery || "";
-    const offset = (page - 1) * limit;
-    const orderBy = req.query.orderBy || "id";
-    const orderDir = req.query.orderDir || "asc";
 
-    let baseQuery = `
-      Select p.*
-      From ecommerce.products p
-    `;
-
-    let whereParts = [];
-    let params = [];
-    let paramsIdx = 1;
+    const params = [];
+    let whereClause = "";
 
     if (searchQuery) {
-      whereParts.push(`p.name ILIKE $${paramsIdx++}`);
       params.push(`%${searchQuery}%`);
+      whereClause = `WHERE p.name ILIKE $1`;
     }
-
-    const whereClause =
-      whereParts.length > 0 ? "WHERE " + whereParts.join(" AND ") : "";
 
     const countResult = await pool.query(
       `SELECT COUNT(1) FROM ecommerce.products p ${whereClause}`,
@@ -36,27 +39,26 @@ route.get("/products", async (req, res) => {
     const totalCount = parseInt(countResult.rows[0].count, 10);
 
     params.push(limit, offset);
+    const limitIdx = params.length - 1;
+    const offsetIdx = params.length;
 
-    const results = await pool.query(
-      `
-        ${baseQuery}
-        ${whereClause}
-        GROUP BY p.id
-        ORDER BY p.${orderBy} ${orderDir}
-        LIMIT $${params.length - 1} OFFSET $${params.length}
-      `,
-      params
-    );
+    const query = `
+      Select p.*
+      FROM ecommerce.products p
+      ${whereClause}
+      ORDER BY p.${orderBy} ${orderDir}
+      LIMIT $${limitIdx} OFFSET $${offsetIdx}
+    `;
 
-    res.set("x-total-count", totalCount);
-    res.set("Access-Control-Expose-Headers", "x-total-count");
-    res.json(results.rows);
+    const results = await pool.query(query, params);
+
+    sendPaginated(res, results.rows, totalCount);
   } catch (err) {
-    res.status(500).json({ message: "Error fetching products" + err });
+    res.status(500).json({ message: "Error fetching products" });
   }
 });
 
-route.get("/products/:id", async (req, res) => {
+router.get("/products/:id", async (req, res) => {
   try {
     const product_id = req.params.id;
     const result = await pool.query(
@@ -77,54 +79,44 @@ route.get("/products/:id", async (req, res) => {
   }
 });
 
-route.get("/category/:category", async (req, res) => {
-  const category = req.params.category;
-  const page = parseInt(req.query.page, 10) || 1;
-  const limit = parseInt(req.query.limit, 10) || 12;
-  const searchQuery = req.query.searchQuery || "";
-  const offset = (page - 1) * limit;
-  const orderBy = req.query.orderBy || "id";
-  const orderDir = req.query.orderDir || "asc";
-
-  let params = [];
-  let whereClause = "";
-  let paramIdx = 1;
-  let whereParts = [];
-  whereParts.push(` lower(p.category) = lower($${paramIdx++})`);
-  params.push(category);
-  if (searchQuery) {
-    whereParts.push(`p.name ILIKE ${paramIdx++}`);
-    params.push(`%${searchQuery}%`);
-  }
-  whereClause = "WHERE" + whereParts.join(" AND ");
-  params.push(limit, offset);
-
+router.get("/category/:category", async (req, res) => {
   try {
-    const results = await pool.query(
-      `
-    Select p.*
-    From ecommerce.products p
-    ${whereClause}
-    ORDER BY ${orderBy} ${orderDir}
-    LIMIT $${params.length - 1} OFFSET $${params.length}
-    `,
+    const { limit, offset, orderBy, orderDir } = getPagination(req);
+    const searchQuery = req.query.searchQuery || "";
+    const { category } = req.params;
+
+    const params = [category];
+
+    let whereClause = "WHERE lower(p.category) = lower($1)";
+
+    if (searchQuery) {
+      params.push(`%${searchQuery}%`);
+      whereParts.push(` AND p.name ILIKE $${params.length}`);
+    }
+
+    const countResult = await pool.query(
+      `SELECT COUNT(1) FROM ecommerce.products p ${whereClause}`,
       params
     );
+    const totalCount = parseInt(countResult.rows[0].count, 10);
 
-    const resultCount = await pool.query(
-      `
-      Select COUNT(1) FROM ecommerce.products p where lower(p.category) = lower($1)
-      `,
-      [category]
-    );
+    params.push(limit, offset);
+    const limitIdx = params.length - 1;
+    const offsetIdx = params.length;
 
-    const totalCount = parseInt(resultCount.rows[0].count, 10);
-    res.set("x-total-count", totalCount);
-    res.set("Access-Control-Expose-Headers", "x-total-count");
-    res.json(results.rows);
+    const query = `
+      Select p.*
+      From ecommerce.products p
+      ${whereClause}
+      ORDER BY p.${orderBy} ${orderDir}
+      LIMIT $${limitIdx} OFFSET $${offsetIdx}
+    `;
+
+    const results = await pool.query(query, params);
+    sendPaginated(res, results.rows, totalCount);
   } catch (err) {
     res.status(500).json({ message: "Error fetching category." });
   }
 });
 
-module.exports = route;
+module.exports = router;

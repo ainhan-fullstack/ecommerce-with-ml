@@ -7,15 +7,14 @@ const {
   generateRefreshToken,
   verifyRefreshToken,
 } = require("../utils/token");
+
 require("dotenv").config({
   path: require("path").resolve(__dirname, "../../.env"),
 });
 
-const route = express.Router();
+const router = express.Router();
 
-const jwt_secret = process.env.JWT_SECRET;
-
-route.post("/signup", validateSignup, async (req, res) => {
+router.post("/signup", validateSignup, async (req, res) => {
   const { username, email, password } = req.body;
 
   try {
@@ -45,9 +44,6 @@ route.post("/signup", validateSignup, async (req, res) => {
 
     const user = result.rows[0];
 
-    // const token = jwt.sign({ id: user.id, email: user.email }, jwt_secret, {
-    //   expiresIn: "7d",
-    // });
     const accessToken = generateAccessToken(user);
     const refreshToken = generateRefreshToken(user);
 
@@ -66,7 +62,7 @@ route.post("/signup", validateSignup, async (req, res) => {
   }
 });
 
-route.post("/login", validateLogin, async (req, res) => {
+router.post("/login", validateLogin, async (req, res) => {
   const { email, password } = req.body;
 
   try {
@@ -82,9 +78,6 @@ route.post("/login", validateLogin, async (req, res) => {
     const match = await bcrypt.compare(password, user.password_hash);
     if (!match) return res.status(400).json({ message: "Invalid credential" });
 
-    // const token = jwt.sign({ id: user.id, email: user.email }, jwt_secret, {
-    //   expiresIn: "7d",
-    // });
     const accessToken = generateAccessToken(user);
     const refreshToken = generateRefreshToken(user);
 
@@ -110,12 +103,12 @@ route.post("/login", validateLogin, async (req, res) => {
   }
 });
 
-route.post("/logout", (req, res) => {
+router.post("/logout", (req, res) => {
   res.clearCookie("refreshToken");
   res.json({ message: "Logged out successfully." });
 });
 
-route.post("/refresh-token", (req, res) => {
+router.post("/refresh-token", (req, res) => {
   const token = req.cookies.refreshToken;
 
   if (!token) return res.status(401).json({ message: "Refresh token missing" });
@@ -130,4 +123,4 @@ route.post("/refresh-token", (req, res) => {
   }
 });
 
-module.exports = route;
+module.exports = router;
