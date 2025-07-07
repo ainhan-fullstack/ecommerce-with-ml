@@ -14,10 +14,12 @@ app.use(cookieParser());
 const authRoutes = require("./routes/auth");
 const paymentRoutes = require("./routes/payment");
 const productRoutes = require("./routes/products");
+const cartRoutes = require("./routes/cart");
 
 app.get("/", (req, res) => res.send("Homepage!"));
 app.use("/api", paymentRoutes);
 app.use("/api", authRoutes);
 app.use("/api", productRoutes);
+app.use("/api", cartRoutes);
 
 module.exports = app;

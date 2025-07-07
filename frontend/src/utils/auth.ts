@@ -65,3 +65,35 @@ export const fetchWithAuth = async (
     }
   }
 };
+
+export const postWithAuth = async (
+  url: string,
+  data: any,
+  config: AxiosRequestConfig = {}
+) => {
+  try {
+    const res = await api.post(url, data, {
+      ...config,
+      headers: {
+        Authorization: `Bearer ${getAccessToken()}`,
+        ...config.headers,
+      },
+    });
+    return res;
+  } catch (err: any) {
+    if (err.response?.status === 401) {
+      const refreshed = await api.post("/refresh-token");
+      setAccessToken(refreshed.data.token);
+      const retry = await api.post(url, data, {
+        ...config,
+        headers: {
+          Authorization: `Bearer ${refreshed.data.token}`,
+          ...config.headers,
+        },
+      });
+      return retry;
+    } else {
+      console.error("Refresh Token Error.", err);
+    }
+  }
+};

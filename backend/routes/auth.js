@@ -115,7 +115,7 @@ route.post("/logout", (req, res) => {
   res.json({ message: "Logged out successfully." });
 });
 
-route.post("/refresh-token", (res, req) => {
+route.post("/refresh-token", (req, res) => {
   const token = req.cookies.refreshToken;
 
   if (!token) return res.status(401).json({ message: "Refresh token missing" });

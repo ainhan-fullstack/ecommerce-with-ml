@@ -1,4 +1,11 @@
-import { createContext, useContext, useState, type ReactNode } from "react";
+import { fetchWithAuth, postWithAuth } from "@/utils/auth";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  type ReactNode,
+} from "react";
 
 type CartContextType = {
   cartCount: number;
@@ -16,8 +23,26 @@ export const useCart = () => {
 export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [cartCount, setCartCount] = useState(0);
 
-  const addToCart = (productId: number, quantity: number) =>
-    setCartCount((prev) => prev + quantity);
+  const addToCart = async (productId: number, quantity: number) => {
+    const res = await postWithAuth("/cart", {
+      product_id: productId,
+      quantity,
+    });
+    setCartCount(res?.data.totalProducts);
+  };
+
+  const refresh = async () => {
+    try {
+      const res = await fetchWithAuth("/cart");
+      setCartCount(res?.data.totalProducts);
+    } catch (err) {
+      console.error("Failed to load cart.");
+    }
+  };
+
+  useEffect(() => {
+    refresh();
+  }, []);
 
   return (
     <CartContext.Provider value={{ cartCount, addToCart }}>

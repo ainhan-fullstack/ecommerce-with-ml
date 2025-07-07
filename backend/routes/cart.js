@@ -1,0 +1,139 @@
+const express = require("express");
+const route = express.Router();
+const pool = require("../config/db");
+const verifyToken = require("../middleware/auth");
+
+const buildCart = async (userId) => {
+  const cartRes = await pool.query(
+    `Select id FROM ecommerce.carts where user_id = $1`,
+    [userId]
+  );
+
+  if (cartRes.rows.length === 0) {
+    return {
+      id: null,
+      products: [],
+      total: 0,
+      discountedTotal: 0,
+      userId,
+      totalProducts: 0,
+      totalQuantity: 0,
+    };
+  }
+
+  const cartId = cartRes.rows[0].id;
+
+  const itemRes = await pool.query(
+    `
+    Select ci.quantity, p.id as product_id, p.name, p.price, p.image_url
+    From ecommerce.cart_items ci
+    JOIN ecommerce.products p ON ci.product_id = p.id
+    Where ci.cart_id = $1
+    `,
+    [cartId]
+  );
+
+  const products = itemRes.rows.map((row) => {
+    const total = parseFloat(row.price) * row.quantity;
+    return {
+      id: row.product_id,
+      title: row.name,
+      price: parseFloat(row.price),
+      quantity: row.quantity,
+      total,
+      discountPercentage: 0,
+      discountedTotal: total,
+      thumnail: row.image_url,
+    };
+  });
+
+  const total = products.reduce((sum, p) => sum + p.total, 0);
+  const discountedTotal = products.reduce(
+    (sum, p) => sum + p.discountedTotal,
+    0
+  );
+  const totalQuantity = products.reduce((sum, p) => sum + p.quantity, 0);
+
+  return {
+    id: cartId,
+    products,
+    total,
+    discountedTotal,
+    userId,
+    totalProducts: products.length,
+    totalQuantity,
+  };
+};
+
+route.get("/cart", verifyToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const cart = await buildCart(userId);
+    res.json(cart);
+  } catch (err) {
+    res.status(500).json({ message: "Server Error." });
+  }
+});
+
+route.post("/cart", verifyToken, async (req, res) => {
+  const userId = req.user.id;
+  const { product_id, quantity } = req.body;
+
+  if (!product_id || !quantity)
+    return res.status(400).json({ message: "Product and quantity required." });
+
+  try {
+    const cartRes = await pool.query(
+      `
+        Select id From ecommerce.carts where user_id = $1
+        `,
+      [userId]
+    );
+
+    let cartId;
+    if (cartRes.rows.length === 0) {
+      const insertCart = await pool.query(
+        `
+        INSERT INTO ecommerce.carts(user_id) VALUES($1) RETURNING id
+        `,
+        [userId]
+      );
+      cartId = insertCart.rows[0].id;
+    } else {
+      cartId = cartRes.rows[0].id;
+    }
+
+    const itemRes = await pool.query(
+      `
+        SELECT id, quantity
+        FROM ecommerce.cart_items
+        WHERE cart_id = $1 and product_id = $2
+        `,
+      [cartId, product_id]
+    );
+
+    if (itemRes.rows.length > 0) {
+      const newQty = itemRes.rows[0].quantity + quantity;
+      await pool.query(
+        `
+            UPDATE ecommerce.cart_items SET quantity = $1 WHERE id = $2
+            `,
+        [newQty, itemRes.rows[0].id]
+      );
+    } else {
+      await pool.query(
+        `
+            INSERT INTO ecommerce.cart_items (cart_id, product_id, quantity) VALUES ($1, $2, $3)
+            `,
+        [cartId, product_id, quantity]
+      );
+    }
+
+    const cart = await buildCart(userId);
+    res.status(200).json(cart);
+  } catch (err) {
+    res.status(500).json({ message: "Server Error." });
+  }
+});
+
+module.exports = route;
