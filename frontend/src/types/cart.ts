@@ -7,6 +7,7 @@ export interface CartProduct {
   discountPercentage: number;
   discountedTotal: number;
   thumbnail: string;
+  stock_quantity: number;
 }
 
 export interface Cart {

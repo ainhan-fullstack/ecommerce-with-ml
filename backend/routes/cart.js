@@ -25,7 +25,7 @@ const buildCart = async (userId) => {
 
   const itemRes = await pool.query(
     `
-    Select ci.quantity, p.id as product_id, p.name, p.price, p.image_url
+    Select ci.quantity, p.id as product_id, p.name, p.price, p.image_url, p.stock_quantity
     From ecommerce.cart_items ci
     JOIN ecommerce.products p ON ci.product_id = p.id
     Where ci.cart_id = $1
@@ -43,7 +43,8 @@ const buildCart = async (userId) => {
       total,
       discountPercentage: 0,
       discountedTotal: total,
-      thumnail: row.image_url,
+      thumbnail: row.image_url,
+      stock_quantity: row.stock_quantity,
     };
   });
 

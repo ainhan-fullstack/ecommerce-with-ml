@@ -5,6 +5,7 @@ import ProductList from "./pages/ProductList";
 import NavBar from "./components/NavBar";
 import CategoryBar from "./components/CategoryBar";
 import ProductDetail from "./pages/ProductDetail";
+import Cart from "./pages/Cart";
 
 function App() {
   const location = useLocation();
@@ -27,6 +28,7 @@ function App() {
         <Route path="/products" element={<ProductList />} />
         <Route path="/products/:id" element={<ProductDetail />} />
         <Route path="/category/:category" element={<ProductList />} />
+        <Route path="/cart" element={<Cart />} />
       </Routes>
     </>
   );
