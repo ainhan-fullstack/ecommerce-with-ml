@@ -2,10 +2,18 @@ import { useCart } from "@/hook/useCart";
 import type { Cart } from "@/types/cart";
 import { fetchWithAuth, postWithAuth } from "@/utils/auth";
 import { useEffect, useState } from "react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const Cart = () => {
   const { cartCount } = useCart();
   const [cart, setCart] = useState<Cart>();
+  const [deliveryFee, setDeliveryFee] = useState(0);
 
   const getCart = async () => {
     const cartRes = await fetchWithAuth("/cart");
@@ -16,7 +24,12 @@ const Cart = () => {
     product_id: number,
     quantity: number
   ) => {
-    await postWithAuth("/cart", { product_id, quantity });
+    const currentQuantity = cart?.products.find(
+      (p) => p.id === product_id
+    )?.quantity;
+    if (currentQuantity === undefined) return;
+    const diffQuantity = quantity - currentQuantity;
+    await postWithAuth("/cart", { product_id, quantity: diffQuantity });
     getCart();
   };
 
@@ -50,7 +63,9 @@ const Cart = () => {
                   disabled={p.quantity === 1}
                   onClick={() => handleChangingQuantity(p.id, p.quantity - 1)}
                   data-input-counter-decrement="quantity-input"
-                  className="bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:border-gray-600 hover:bg-gray-200 border border-gray-300 rounded-s-lg p-3 h-11 focus:ring-gray-100 dark:focus:ring-gray-700 focus:ring-2 focus:outline-none"
+                  className={`bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:border-gray-600 hover:bg-gray-200 border border-gray-300 rounded-s-lg p-3 h-11 focus:ring-gray-100 dark:focus:ring-gray-700 focus:ring-2 focus:outline-none ${
+                    p.quantity === 1 ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
                 >
                   <svg
                     className="w-3 h-3 text-gray-900 dark:text-white"
@@ -73,7 +88,11 @@ const Cart = () => {
                   id="quantity-input"
                   data-input-counter
                   aria-describedby="helper-text-explanation"
-                  className="bg-gray-50 border-x-0 border-gray-300 h-11 text-black text-center text-sm front-bold focus:ring-blue-500 focus:border-blue-500 block w-full py-2.5"
+                  className={`bg-gray-50 border-x-0 border-gray-300 h-11 text-black text-center text-sm front-bold focus:ring-blue-500 focus:border-blue-500 block w-full py-2.5 ${
+                    p.quantity === p.stock_quantity
+                      ? "opacity-50 cursor-not-allowed"
+                      : ""
+                  }`}
                   value={p.quantity}
                   min={1}
                   max={p.stock_quantity}
@@ -113,9 +132,41 @@ const Cart = () => {
           </div>
           <div>
             <p>Total</p>
+            <p>${p.total}</p>
           </div>
         </div>
       ))}
+      <div>
+        <h2>Delivery Service:</h2>
+        <Select
+          onValueChange={(value) => {
+            if (value === "standard") {
+              setDeliveryFee(10);
+            } else if (value === "express") {
+              setDeliveryFee(15);
+            } else {
+              setDeliveryFee(0);
+            }
+          }}
+        >
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Services" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="standard">Standard delivery</SelectItem>
+            <SelectItem value="express">Express delivery</SelectItem>
+          </SelectContent>
+        </Select>
+        <p>Fee:${deliveryFee}</p>
+      </div>
+      <div>
+        <p>Subtotal:</p>
+        <p>${cart?.total}</p>
+      </div>
+      <div>
+        <p>Grand total:</p>
+      </div>
+      <button>Checkout</button>
     </div>
   );
 };

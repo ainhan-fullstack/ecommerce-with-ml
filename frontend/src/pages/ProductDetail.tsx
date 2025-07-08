@@ -108,10 +108,8 @@ const ProductDetail = () => {
         <div className="mt-6">
           <h2 className="font-semibold text-lg mb-2">Delivery</h2>
           <ul className="text-sm text-gray-600 space-y-1">
-            <li>• Free standard shipping on orders over $35</li>
             <li>• Standard delivery (2-5 days): $4.00</li>
             <li>• Express delivery (1-2 days): $10.00</li>
-            <li>• Ships from: USA Warehouse</li>
           </ul>
         </div>
 
