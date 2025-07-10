@@ -16,6 +16,9 @@ export interface Cart {
   total: number;
   discountedTotal: number;
   userId: number;
+  deliveryMethod: string | null;
+  deliveryFee: number;
   totalProducts: number;
   totalQuantity: number;
+  grandTotal: number;
 }

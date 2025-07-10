@@ -5,7 +5,7 @@ const verifyToken = require("../middleware/auth");
 
 const buildCart = async (userId) => {
   const cartRes = await pool.query(
-    `Select id FROM ecommerce.carts where user_id = $1`,
+    `Select id, delivery_method, delivery_fee FROM ecommerce.carts where user_id = $1`,
     [userId]
   );
 
@@ -16,12 +16,17 @@ const buildCart = async (userId) => {
       total: 0,
       discountedTotal: 0,
       userId,
+      deliveryMethod: null,
+      deliveryFee: 0,
       totalProducts: 0,
       totalQuantity: 0,
+      grandTotal: 0,
     };
   }
 
   const cartId = cartRes.rows[0].id;
+  const deliveryMethod = cartRes.rows[0].delivery_method || null;
+  const deliveryFee = cartRes.rows[0].delivery_fee || 0;
 
   const itemRes = await pool.query(
     `
@@ -54,6 +59,7 @@ const buildCart = async (userId) => {
     0
   );
   const totalQuantity = products.reduce((sum, p) => sum + p.quantity, 0);
+  const grandTotal = total + parseFloat(deliveryFee);
 
   return {
     id: cartId,
@@ -61,8 +67,11 @@ const buildCart = async (userId) => {
     total,
     discountedTotal,
     userId,
+    deliveryMethod,
+    deliveryFee,
     totalProducts: products.length,
     totalQuantity,
+    grandTotal,
   };
 };
 
@@ -95,9 +104,9 @@ router.post("/cart", verifyToken, async (req, res) => {
     if (cartRes.rows.length === 0) {
       const insertCart = await pool.query(
         `
-        INSERT INTO ecommerce.carts(user_id) VALUES($1) RETURNING id
+        INSERT INTO ecommerce.carts(user_id, delivery_method, delivery_fee) VALUES($1, $2, $3) RETURNING id
         `,
-        [userId]
+        [userId, null, 0]
       );
       cartId = insertCart.rows[0].id;
     } else {
@@ -127,6 +136,49 @@ router.post("/cart", verifyToken, async (req, res) => {
             INSERT INTO ecommerce.cart_items (cart_id, product_id, quantity) VALUES ($1, $2, $3)
             `,
         [cartId, product_id, quantity]
+      );
+    }
+
+    const cart = await buildCart(userId);
+    res.status(200).json(cart);
+  } catch (err) {
+    res.status(500).json({ message: "Server Error." });
+  }
+});
+
+router.post("/cart/delivery", verifyToken, async (req, res) => {
+  const { delivery_method, delivery_fee } = req.body;
+  const userId = req.user.id;
+
+  if (!delivery_method || delivery_fee === undefined)
+    return res
+      .status(400)
+      .json({ message: "Delevery method and delivery fee required." });
+  try {
+    const cartRes = await pool.query(
+      `
+    Select id from ecommerce.carts where user_id = $1
+    `,
+      [userId]
+    );
+
+    let cartId;
+
+    if (cartRes.rows.length === 0) {
+      const newCart = await pool.query(
+        `
+      INSERT INTO ecommerce.carts (user_id, delivery_method, delivery_fee) VALUES($1, $2, $3) RETURNING id
+      `,
+        [userId, null, 0]
+      );
+      cartId = newCart.rows[0].id;
+    } else {
+      cartId = cartRes.rows[0].id;
+      await pool.query(
+        `
+      UPDATE ecommerce.carts SET delivery_method = $1, delivery_fee = $2 where id = $3
+      `,
+        [delivery_method, delivery_fee, cartId]
       );
     }
 
