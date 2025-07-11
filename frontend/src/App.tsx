@@ -6,6 +6,7 @@ import NavBar from "./components/NavBar";
 import CategoryBar from "./components/CategoryBar";
 import ProductDetail from "./pages/ProductDetail";
 import Cart from "./pages/Cart";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   const location = useLocation();
@@ -23,13 +24,20 @@ function App() {
         </>
       )}
       <Routes>
-        <Route path="/" element={<Navigate to="/login" />} />
+        <Route path="/" element={<Navigate to="/products" />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/products" element={<ProductList />} />
         <Route path="/products/:id" element={<ProductDetail />} />
         <Route path="/category/:category" element={<ProductList />} />
-        <Route path="/cart" element={<Cart />} />
+        <Route
+          path="/cart"
+          element={
+            <ProtectedRoute>
+              <Cart />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </>
   );

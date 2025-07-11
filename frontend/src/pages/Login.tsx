@@ -3,8 +3,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import type { LoginInputs } from "../types/auth";
 import api from "../utils/axios";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { setAccessToken } from "../utils/auth";
+import logo from "../assets/ecommerce-random-logo.webp";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address."),
@@ -23,51 +24,63 @@ const Login = () => {
 
   const onSubmit = async (data: LoginInputs) => {
     try {
-      //const url = "http://localhost:5000/api/login";
       const res = await api.post("/login", data, {
         withCredentials: true,
       });
       localStorage.setItem("token", res.data.token);
       setAccessToken(res.data.token);
-      navigate("/");
+      navigate("/products");
     } catch (err: any) {
       alert(err.response?.data?.message);
     }
   };
 
   return (
-    <form
-      onSubmit={handleSubmit(onSubmit)}
-      className="max-w-md mx-auto p-6 space-y-4 bg-white rounded shadow"
-    >
-      <h2 className="text-2xl font-semibold text-center">Login</h2>
-      <div>
-        <input
-          className="w-full p-2 border rounded"
-          type="email"
-          placeholder="Email"
-          {...register("email")}
-        />
-        {errors.email && <p className="text-red-600">{errors.email.message}</p>}
-      </div>
-      <div>
-        <input
-          className="w-full p-2 border rounded"
-          type="password"
-          placeholder="Password"
-          {...register("password")}
-        />
-        {errors.password && (
-          <p className="text-red-600">{errors.password.message}</p>
-        )}
-      </div>
-      <button
-        className="w-full p-2 bg-blue-600 rounded hover:bg-blue-700 cursor-pointer text-white"
-        type="submit"
+    <>
+      <Link to={"/"}>
+        <img src={logo} alt="Logo" className="w-15 h-15 object-contain" />
+      </Link>
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="max-w-md mx-auto p-6 space-y-4 bg-white rounded shadow"
       >
-        Login
-      </button>
-    </form>
+        <h2 className="text-2xl font-semibold text-center">Login</h2>
+        <div>
+          <input
+            className="w-full p-2 border rounded"
+            type="email"
+            placeholder="Email"
+            {...register("email")}
+          />
+          {errors.email && (
+            <p className="text-red-600">{errors.email.message}</p>
+          )}
+        </div>
+        <div>
+          <input
+            className="w-full p-2 border rounded"
+            type="password"
+            placeholder="Password"
+            {...register("password")}
+          />
+          {errors.password && (
+            <p className="text-red-600">{errors.password.message}</p>
+          )}
+        </div>
+        <button
+          className="w-full p-2 bg-blue-600 rounded hover:bg-blue-700 cursor-pointer text-white"
+          type="submit"
+        >
+          Login
+        </button>
+        <button
+          className="w-full p-2 bg-gray-600 rounded hover:bg-gray-700 cursor-pointer text-white"
+          onClick={() => navigate("/signup")}
+        >
+          Signup
+        </button>
+      </form>
+    </>
   );
 };
 

@@ -4,13 +4,19 @@ import { Menu, ShoppingCart, User, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import CategoryBar from "./CategoryBar";
 import { useCart } from "@/hook/useCart";
+import { isTokenValid } from "../utils/auth";
 
 const NavBar = () => {
   const [showBurger, setShowBurger] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [search, setSearch] = useState("");
   const navigate = useNavigate();
   const { cartCount } = useCart();
+
+  useEffect(() => {
+    setIsAuthenticated(isTokenValid());
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -64,17 +70,30 @@ const NavBar = () => {
           </div>
         </div>
         <div className="flex items-center gap-6">
+          {isAuthenticated ? (
+            <button
+              className="flex items-center gap-1 hover:text-primary cursor-pointer"
+              onClick={() => {
+                window.location.href = "/profile";
+              }}
+            >
+              <User className="w-5 h-5" />
+              <span>User Profile</span>
+            </button>
+          ) : (
+            <button
+              className="flex items-center gap-1 hover:text-primary cursor-pointer"
+              onClick={() => {
+                window.location.href = "/login";
+              }}
+            >
+              <User className="w-5 h-5" />
+              <span>Login</span>
+            </button>
+          )}
+
           <button
-            className="flex items-center gap-1 hover:text-primary"
-            onClick={() => {
-              window.location.href = "/profile";
-            }}
-          >
-            <User className="w-5 h-5" />
-            <span>User Profile</span>
-          </button>
-          <button
-            className="relative flex items-center gap-1 hover:text-primary"
+            className="relative flex items-center gap-1 hover:text-primary cursor-pointer"
             onClick={() => {
               window.location.href = "/cart";
             }}
@@ -84,6 +103,18 @@ const NavBar = () => {
             </span>
             <ShoppingCart className="w-5 h-5" />
           </button>
+
+          {isAuthenticated && (
+            <button
+              className="flex items-center gap-1 hover:text-primary cursor-pointer"
+              onClick={() => {
+                window.location.href = "/login";
+              }}
+            >
+              <User className="w-5 h-5" />
+              <span>Logout</span>
+            </button>
+          )}
         </div>
       </nav>
       {menuOpen && (
