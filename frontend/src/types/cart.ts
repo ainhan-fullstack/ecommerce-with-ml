@@ -18,6 +18,7 @@ export interface Cart {
   userId: number;
   deliveryMethod: string | null;
   deliveryFee: number;
+  isDeleted: boolean;
   totalProducts: number;
   totalQuantity: number;
   grandTotal: number;

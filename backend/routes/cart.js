@@ -5,7 +5,7 @@ const verifyToken = require("../middleware/auth");
 
 const buildCart = async (userId) => {
   const cartRes = await pool.query(
-    `Select id, delivery_method, delivery_fee FROM ecommerce.carts where user_id = $1`,
+    `Select id, delivery_method, delivery_fee, is_deleted FROM ecommerce.carts where user_id = $1`,
     [userId]
   );
 
@@ -18,6 +18,7 @@ const buildCart = async (userId) => {
       userId,
       deliveryMethod: null,
       deliveryFee: 0,
+      is_deleted: false,
       totalProducts: 0,
       totalQuantity: 0,
       grandTotal: 0,
@@ -27,6 +28,7 @@ const buildCart = async (userId) => {
   const cartId = cartRes.rows[0].id;
   const deliveryMethod = cartRes.rows[0].delivery_method || null;
   const deliveryFee = cartRes.rows[0].delivery_fee || 0;
+  const isDeleted = cartRes.rows[0].is_deleted || false;
 
   const itemRes = await pool.query(
     `
@@ -69,6 +71,7 @@ const buildCart = async (userId) => {
     userId,
     deliveryMethod,
     deliveryFee,
+    isDeleted,
     totalProducts: products.length,
     totalQuantity,
     grandTotal,
@@ -104,9 +107,9 @@ router.post("/cart", verifyToken, async (req, res) => {
     if (cartRes.rows.length === 0) {
       const insertCart = await pool.query(
         `
-        INSERT INTO ecommerce.carts(user_id, delivery_method, delivery_fee) VALUES($1, $2, $3) RETURNING id
+        INSERT INTO ecommerce.carts(user_id, delivery_method, delivery_fee, is_deleted) VALUES($1, $2, $3, $4) RETURNING id
         `,
-        [userId, null, 0]
+        [userId, null, 0, false]
       );
       cartId = insertCart.rows[0].id;
     } else {
@@ -167,9 +170,9 @@ router.post("/cart/delivery", verifyToken, async (req, res) => {
     if (cartRes.rows.length === 0) {
       const newCart = await pool.query(
         `
-      INSERT INTO ecommerce.carts (user_id, delivery_method, delivery_fee) VALUES($1, $2, $3) RETURNING id
+      INSERT INTO ecommerce.carts (user_id, delivery_method, delivery_fee, is_deleted) VALUES($1, $2, $3, $4) RETURNING id
       `,
-        [userId, null, 0]
+        [userId, null, 0, false]
       );
       cartId = newCart.rows[0].id;
     } else {
@@ -186,6 +189,38 @@ router.post("/cart/delivery", verifyToken, async (req, res) => {
     res.status(200).json(cart);
   } catch (err) {
     res.status(500).json({ message: "Server Error." });
+  }
+});
+
+router.post("/cart/delete", verifyToken, async (req, res) => {
+  const { cartId, productId } = req.body;
+  const userId = req.user.id;
+
+  if (!cartId || !productId)
+    return res
+      .status(400)
+      .json({ message: "Cart ID and Product ID required." });
+
+  try {
+    await pool.query(
+      `
+    DELETE FROM ecommerce.cart_items WHERE cart_id = $1 and product_id = $2
+    `,
+      [cartId, productId]
+    );
+
+    await pool.query(
+      `
+    UPDATE ecommerce.carts SET delivery_fee = $1, delivery_method = $2 Where id = $3
+    `,
+      [0, null, cartId]
+    );
+
+    const cart = await buildCart(userId);
+
+    res.status(200).json(cart);
+  } catch (err) {
+    res.status(500).json({ message: "Server error." });
   }
 });
 

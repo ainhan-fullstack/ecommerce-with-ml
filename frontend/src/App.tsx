@@ -12,7 +12,8 @@ function App() {
   const showCategoryBar =
     location.pathname === "/products" ||
     location.pathname.startsWith("/products/") ||
-    location.pathname.startsWith("/category/");
+    location.pathname.startsWith("/category/") ||
+    location.pathname.startsWith("/cart");
   return (
     <>
       {showCategoryBar && (
