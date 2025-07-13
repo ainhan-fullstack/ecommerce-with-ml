@@ -25,12 +25,12 @@ const Signup = () => {
 
   const onSubmit = async (data: SignupInputs) => {
     try {
-      const res = await api.post("/singup", data);
+      const res = await api.post("/signup", data);
       setAccessToken(res.data.token);
       localStorage.setItem("token", res.data.token);
       navigate("/products");
     } catch (err: any) {
-      alert(err.response?.data?.message);
+      alert("Signup Error!");
     }
   };
 

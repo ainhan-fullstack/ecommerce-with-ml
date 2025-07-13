@@ -12,14 +12,13 @@ app.use(bodyParser.json());
 app.use(cookieParser());
 
 const authRoutes = require("./routes/auth");
-const paymentRoutes = require("./routes/payment");
 const productRoutes = require("./routes/products");
 const cartRoutes = require("./routes/cart");
+const orderRoutes = require("./routes/orders");
 
-app.get("/", (req, res) => res.send("Homepage!"));
-app.use("/api", paymentRoutes);
 app.use("/api", authRoutes);
 app.use("/api", productRoutes);
 app.use("/api", cartRoutes);
+app.use("/api", orderRoutes);
 
 module.exports = app;
