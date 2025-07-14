@@ -7,6 +7,8 @@ import CategoryBar from "./components/CategoryBar";
 import ProductDetail from "./pages/ProductDetail";
 import Cart from "./pages/Cart";
 import ProtectedRoute from "./components/ProtectedRoute";
+import Orders from "./pages/Orders";
+import Checkout from "./pages/Checkout";
 
 function App() {
   const location = useLocation();
@@ -14,7 +16,9 @@ function App() {
     location.pathname === "/products" ||
     location.pathname.startsWith("/products/") ||
     location.pathname.startsWith("/category/") ||
-    location.pathname.startsWith("/cart");
+    location.pathname.startsWith("/cart") ||
+    location.pathname.startsWith("/checkout") ||
+    location.pathname.startsWith("/orders");
   return (
     <>
       {showCategoryBar && (
@@ -35,6 +39,22 @@ function App() {
           element={
             <ProtectedRoute>
               <Cart />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/checkout"
+          element={
+            <ProtectedRoute>
+              <Checkout />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/orders"
+          element={
+            <ProtectedRoute>
+              <Orders />
             </ProtectedRoute>
           }
         />

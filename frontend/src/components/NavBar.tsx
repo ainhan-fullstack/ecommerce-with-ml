@@ -107,6 +107,15 @@ const NavBar = () => {
           {isAuthenticated && (
             <button
               className="flex items-center gap-1 hover:text-primary cursor-pointer"
+              onClick={() => (window.location.href = "/orders")}
+            >
+              <span>Orders</span>
+            </button>
+          )}
+
+          {isAuthenticated && (
+            <button
+              className="flex items-center gap-1 hover:text-primary cursor-pointer"
               onClick={() => {
                 window.location.href = "/login";
               }}

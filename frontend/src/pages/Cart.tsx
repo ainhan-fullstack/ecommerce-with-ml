@@ -11,10 +11,12 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Trash } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const Cart = () => {
   const [cart, setCart] = useState<Cart>();
   const [deliveryMethod, setDeliveryMethod] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const getCart = async () => {
     const cartRes = await fetchWithAuth("/cart");
@@ -229,6 +231,12 @@ const Cart = () => {
                 <span>Grand total:</span>
                 <span>${cart?.grandTotal?.toFixed(2) || "0.00"}</span>
               </div>
+              <Button
+                className="mt-4 w-full"
+                onClick={() => navigate("/checkout")}
+              >
+                Checkout
+              </Button>
             </CardContent>
           </Card>
         </div>
