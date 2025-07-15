@@ -1,6 +1,6 @@
 # 🛒 Full-Stack E-Commerce Platform with Machine Learning
 
-This project is a modern full-stack e-commerce web application that integrates machine learning for customer segmentation, personalised recommendations, and inventory management. It is designed for scalability and real-world deployment, leveraging AWS cloud services.
+This project is a modern full-stack e-commerce web application. It is designed for scalability and real-world deployment, leveraging AWS cloud services.
 
 ---
 
@@ -13,12 +13,7 @@ This project is a modern full-stack e-commerce web application that integrates m
 - Order management & checkout
 - User profile management
 
-### 2️⃣ Machine Learning Integration
-- Customer segmentation using K-Means clustering
-- Personalised product recommendations (collaborative filtering)
-- Inventory forecasting using time series models
-
-### 3️⃣ Deployment & DevOps
+### 2️⃣ Deployment & DevOps
 - Docker containerization
 - AWS deployment (EC2, RDS, S3)
 - CI/CD pipeline integration (GitHub Actions)
@@ -32,7 +27,6 @@ This project is a modern full-stack e-commerce web application that integrates m
 | **Frontend**  | React.js, Tailwind CSS, Axios                  |
 | **Backend**   | Node.js, Express.js, REST API                  |
 | **Database**  | PostgreSQL                                     |
-| **ML Service**| Python (FastAPI, scikit-learn, Prophet)        |
 | **Cloud**     | AWS (EC2, RDS, S3)                             |
 | **Container** | Docker, Docker Compose                         |
 | **CI/CD**     | GitHub Actions                                 |
@@ -93,16 +87,6 @@ Below is a **simplified schema** for the PostgreSQL database:
 
 ---
 
-## 🧠 ML Service (Planned)
-
-- Separate Python FastAPI microservice.
-- Exposes endpoints for:
-  - `/segment` — returns user segment based on RFM.
-  - `/recommend` — returns recommended products.
-  - `/forecast` — returns inventory forecasts.
-
----
-
 ## 🔗 Planned Architecture Diagram (Text Placeholder)
 
           +------------------------+
@@ -132,11 +116,6 @@ Below is a **simplified schema** for the PostgreSQL database:
         +----------------------+
         |  PostgreSQL Database |
         +----------------------+
-                    |
-                    v
-    +--------------------------------+
-    | Python FastAPI ML Microservice |
-    +--------------------------------+
                     |
                     v
         +----------------------+
