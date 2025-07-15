@@ -10,6 +10,8 @@ import {
 type CartContextType = {
   cartCount: number;
   addToCart: (productId: number, quantity: number) => void;
+  refresh: () => Promise<void>;
+  clearCart: () => Promise<void>;
 };
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -40,12 +42,17 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const clearCart = async () => {
+    await postWithAuth("/cart/clear", {});
+    setCartCount(0);
+  };
+
   useEffect(() => {
     refresh();
   }, []);
 
   return (
-    <CartContext.Provider value={{ cartCount, addToCart }}>
+    <CartContext.Provider value={{ cartCount, addToCart, refresh, clearCart }}>
       {children}
     </CartContext.Provider>
   );

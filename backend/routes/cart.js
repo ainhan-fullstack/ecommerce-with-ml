@@ -224,4 +224,39 @@ router.post("/cart/delete", verifyToken, async (req, res) => {
   }
 });
 
+router.post("/cart/clear", verifyToken, async (req, res) => {
+  const userId = req.user.id;
+
+  try {
+    const cartRes = await pool.query(
+      `
+      Select id From ecommerce.carts Where user_id = $1
+      `,
+      [userId]
+    );
+    if (cartRes.rows.length === 0) {
+      const empty = await buildCart(userId);
+      return res.status(200).json(empty);
+    }
+    const cartId = cartRes.rows[0].id;
+    await pool.query(
+      `
+        DELETE FROM ecommerce.cart_items where cart_id = $1
+        `,
+      [cartId]
+    );
+    await pool.query(
+      `
+        UPDATE ecommer.carts SET delivery_fee = $1, delivery_method = $2 WHERE cart_id = $3
+        `,
+      [0, null, cartId]
+    );
+    const cart = await buildCart(userId);
+    res.status(200).json(cart);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server Error." });
+  }
+});
+
 module.exports = router;

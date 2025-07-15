@@ -5,7 +5,7 @@ import {
   useElements,
   useStripe,
 } from "@stripe/react-stripe-js";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import type { Cart } from "@/types/cart";
 import { useNavigate } from "react-router-dom";
@@ -17,7 +17,7 @@ const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY as
 
 const stripePromise = publishableKey ? loadStripe(publishableKey) : null;
 
-const CheckoutForm = ({ clientSecret }: { clientSecret: string }) => {
+const CheckoutForm = () => {
   const stripe = useStripe();
   const elements = useElements();
   const [message, setMessage] = useState<string | null>(null);
@@ -46,10 +46,13 @@ const CheckoutForm = ({ clientSecret }: { clientSecret: string }) => {
 
 const Checkout = () => {
   const [clientSecret, setClientSecret] = useState<string | null>(null);
-  const [cart, setCart] = useState<Cart | null>(null);
   const navigate = useNavigate();
 
+  const hasInit = useRef(false);
+
   useEffect(() => {
+    if (hasInit.current) return;
+    hasInit.current = true;
     const init = async () => {
       try {
         const cartRes = await fetchWithAuth("/cart");
@@ -58,8 +61,6 @@ const Checkout = () => {
           navigate("/cart");
           return;
         }
-
-        setCart(c);
 
         const items = c.products.map((p) => ({
           product_id: p.id,
@@ -91,7 +92,7 @@ const Checkout = () => {
     <div>
       <h1>Checkout</h1>
       <Elements options={{ clientSecret }} stripe={stripePromise}>
-        <CheckoutForm clientSecret={clientSecret} />
+        <CheckoutForm />
       </Elements>
     </div>
   );
