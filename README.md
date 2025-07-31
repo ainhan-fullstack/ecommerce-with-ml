@@ -13,11 +13,6 @@ This project is a modern full-stack e-commerce web application. It is designed f
 - Order management & checkout
 - User profile management
 
-### 2️⃣ Deployment & DevOps
-- Docker containerization
-- AWS deployment (EC2, RDS, S3)
-- CI/CD pipeline integration (GitHub Actions)
-
 ---
 
 ## 🛠️ Tech Stack
@@ -27,9 +22,6 @@ This project is a modern full-stack e-commerce web application. It is designed f
 | **Frontend**  | React.js, Tailwind CSS, Axios                  |
 | **Backend**   | Node.js, Express.js, REST API                  |
 | **Database**  | PostgreSQL                                     |
-| **Cloud**     | AWS (EC2, RDS, S3)                             |
-| **Container** | Docker, Docker Compose                         |
-| **CI/CD**     | GitHub Actions                                 |
 
 ---
 
@@ -115,9 +107,4 @@ Below is a **simplified schema** for the PostgreSQL database:
                     v
         +----------------------+
         |  PostgreSQL Database |
-        +----------------------+
-                    |
-                    v
-        +----------------------+
-        |  AWS Cloud Deploy    |
         +----------------------+
