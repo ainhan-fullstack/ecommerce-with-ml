@@ -1,6 +1,6 @@
-# 🛒 Full-Stack E-Commerce Platform with Machine Learning
+# 🛒 Full-Stack E-Commerce Platform
 
-This project is a modern full-stack e-commerce web application. It is designed for scalability and real-world deployment, leveraging AWS cloud services.
+This project is a modern full-stack e-commerce web application. It is designed for scalability and real-world deployment.
 
 ---
 
