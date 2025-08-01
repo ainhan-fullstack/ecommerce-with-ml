@@ -6,6 +6,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { useNavigate } from "react-router-dom";
 
 type CartContextType = {
   cartCount: number;
@@ -24,13 +25,19 @@ export const useCart = () => {
 
 export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [cartCount, setCartCount] = useState(0);
+  const navigate = useNavigate();
 
   const addToCart = async (productId: number, quantity: number) => {
-    const res = await postWithAuth("/cart", {
-      product_id: productId,
-      quantity,
-    });
-    setCartCount(res?.data.totalProducts);
+    try {
+      const res = await postWithAuth("/cart", {
+        product_id: productId,
+        quantity,
+      });
+      setCartCount(res?.data.totalProducts);
+    } catch (err) {
+      navigate("/login");
+      console.error("Failed to add to cart!");
+    }
   };
 
   const refresh = async () => {
