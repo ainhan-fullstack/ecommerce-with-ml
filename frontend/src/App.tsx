@@ -10,6 +10,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import Orders from "./pages/Orders";
 import Checkout from "./pages/Checkout";
 import Profile from "./pages/Profile";
+import ChangePassword from "./pages/ChangePassword";
 
 function App() {
   const location = useLocation();
@@ -20,7 +21,8 @@ function App() {
     location.pathname.startsWith("/cart") ||
     location.pathname.startsWith("/checkout") ||
     location.pathname.startsWith("/orders") ||
-    location.pathname.startsWith("/profile");
+    location.pathname.startsWith("/profile") ||
+    location.pathname.startsWith("/profile/");
   return (
     <>
       {showCategoryBar && (
@@ -41,6 +43,14 @@ function App() {
           element={
             <ProtectedRoute>
               <Profile />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile/change-password"
+          element={
+            <ProtectedRoute>
+              <ChangePassword />
             </ProtectedRoute>
           }
         />

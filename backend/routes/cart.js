@@ -247,7 +247,7 @@ router.post("/cart/clear", verifyToken, async (req, res) => {
     );
     await pool.query(
       `
-        UPDATE ecommer.carts SET delivery_fee = $1, delivery_method = $2 WHERE cart_id = $3
+        UPDATE ecommerce.carts SET delivery_fee = $1, delivery_method = $2 WHERE cart_id = $3
         `,
       [0, null, cartId]
     );

@@ -57,7 +57,11 @@ const Profile = () => {
         <CardContent className="p-4 mx-auto my-auto">
           <ul className="space-y-2">
             <li>
-              <Button variant="outline" className="w-full cursor-pointer">
+              <Button
+                variant="outline"
+                className="w-full cursor-pointer"
+                onClick={() => navigate("/profile/change-password")}
+              >
                 Change Password
               </Button>
             </li>
