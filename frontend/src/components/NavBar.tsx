@@ -4,7 +4,7 @@ import { Menu, ShoppingCart, User, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import CategoryBar from "./CategoryBar";
 import { useCart } from "@/hook/useCart";
-import { isTokenValid } from "../utils/auth";
+import { isTokenValid, postWithAuth, setAccessToken } from "../utils/auth";
 
 const NavBar = () => {
   const [showBurger, setShowBurger] = useState(false);
@@ -39,6 +39,20 @@ const NavBar = () => {
   const handleMenuToggle = () => {
     setMenuOpen((prev) => !prev);
   };
+
+  const handleLogout = async () => {
+    try {
+      await postWithAuth("/logout", {});
+    } catch (err) {
+      console.error(err);
+    } finally {
+      localStorage.removeItem("token");
+      setAccessToken("");
+      navigate("/products");
+      window.location.reload();
+    }
+  };
+
   return (
     <>
       <nav className="w-full bg-white shadow flex items-center justify-between px-8 h-16 fixed top-0 left-0 z-50">
@@ -116,9 +130,7 @@ const NavBar = () => {
           {isAuthenticated && (
             <button
               className="flex items-center gap-1 hover:text-primary cursor-pointer"
-              onClick={() => {
-                window.location.href = "/login";
-              }}
+              onClick={handleLogout}
             >
               <User className="w-5 h-5" />
               <span>Logout</span>

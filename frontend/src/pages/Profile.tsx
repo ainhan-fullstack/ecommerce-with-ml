@@ -19,7 +19,9 @@ const Profile = () => {
           setUsername(res?.data.username || "");
           setEmail(res?.data.email || "");
           setAbout(res.data.about_me);
-          setAvatar("https://via.placeholder.com/150?text=Profile");
+          setAvatar(
+            "https://media.istockphoto.com/id/1337144146/vector/default-avatar-profile-icon-vector.jpg?s=612x612&w=0&k=20&c=BIbFwuv7FxTWvh5S3vB6bkT0Qv8Vn8N5Ffseq84ClGI="
+          );
         }
       } catch (err) {
         console.error(err);
@@ -36,7 +38,8 @@ const Profile = () => {
     } finally {
       localStorage.removeItem("token");
       setAccessToken("");
-      navigate("/login");
+      navigate("/products");
+      window.location.reload();
     }
   };
 
