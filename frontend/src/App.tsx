@@ -9,6 +9,7 @@ import Cart from "./pages/Cart";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Orders from "./pages/Orders";
 import Checkout from "./pages/Checkout";
+import Profile from "./pages/Profile";
 
 function App() {
   const location = useLocation();
@@ -18,7 +19,8 @@ function App() {
     location.pathname.startsWith("/category/") ||
     location.pathname.startsWith("/cart") ||
     location.pathname.startsWith("/checkout") ||
-    location.pathname.startsWith("/orders");
+    location.pathname.startsWith("/orders") ||
+    location.pathname.startsWith("/profile");
   return (
     <>
       {showCategoryBar && (
@@ -34,6 +36,14 @@ function App() {
         <Route path="/products" element={<ProductList />} />
         <Route path="/products/:id" element={<ProductDetail />} />
         <Route path="/category/:category" element={<ProductList />} />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/cart"
           element={
