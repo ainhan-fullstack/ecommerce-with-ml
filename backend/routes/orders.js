@@ -3,6 +3,7 @@ const router = express.Router();
 const pool = require("../config/db");
 const stripe = require("../config/stripe");
 const verifyToken = require("../middleware/auth");
+const { verify } = require("jsonwebtoken");
 
 router.post("/orders", verifyToken, async (req, res) => {
   const { items = [], delivery_fee = 0 } = req.body;
@@ -85,6 +86,23 @@ router.get("/orders", verifyToken, async (req, res) => {
     console.error(err);
     res.status(500).json({ message: "Server Error." });
   }
+});
+
+router.post("/cancel-order", verifyToken, async (req, res) => {
+  const orderId = req.body.orderId;
+  if (orderId) {
+    try {
+      await pool.query(
+        `UPDATE ecommerce.orders SET status='canceled' WHERE id = $1`,
+        [orderId]
+      );
+      res.status(200).json({ message: "Canceled order successfully." });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: "Server error." });
+    }
+  }
+  res.status(400).json({ message: "Bad Request." });
 });
 
 module.exports = router;
