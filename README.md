@@ -1,6 +1,6 @@
 # 🛒 Full-Stack E-Commerce Platform.
 
-Demo video: https://youtu.be/iVvbWsQniio
+Demo video: https://youtu.be/G1fNjBTrlYU
 
 This project is a modern full-stack e-commerce web application. It is designed for scalability and real-world deployment.
 
